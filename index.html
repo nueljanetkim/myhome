@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 미니홈피</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Malgun Gothic', 'Dotum', sans-serif; }
+        
+        body { 
+            background-color: #0d0d0f; 
+            color: #ffffff; 
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hompy-frame { 
+            width: 100%; 
+            max-width: 680px; 
+            aspect-ratio: 1 / 1; 
+            background: #161619; 
+            border: 2px solid #2a2a2e; 
+            border-radius: 12px; 
+            padding: 16px; 
+            box-shadow: 0 0 25px rgba(0,0,0,0.9); 
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; 
+            position: relative;
+        }
+
+        .hompy-frame::-webkit-scrollbar { width: 6px; }
+        .hompy-frame::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding-bottom: 8px; 
+            border-bottom: 1px solid #444; 
+            margin-bottom: 12px; 
+            flex-shrink: 0;
+        }
+        
+        .main-title-input { 
+            font-size: 14px; 
+            font-weight: bold; 
+            color: #ffffff; 
+            background: transparent;
+            border: none;
+            border-bottom: 1px dashed #555;
+            padding: 2px 4px;
+            width: 48%;
+            letter-spacing: 0.5px;
+        }
+        .main-title-input:read-only { border-bottom: 1px solid transparent; }
+
+        .visitor-count { 
+            font-size: 11px; 
+            color: #aaa; 
+            background: #222226;
+            padding: 3px 6px;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+        .visitor-count span { color: #ff8c00; font-weight: bold; }
+        .visitor-count span.total-num { color: #ffffff; }
+        
+        .admin-btn { 
+            background: #25252b; 
+            color: #ffffff; 
+            border: 1px solid #555; 
+            padding: 3px 8px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 10px;
+            transition: 0.2s;
+        }
+        .admin-btn:hover { background: #444; }
+
+        .main-layout { 
+            display: grid; 
+            grid-template-columns: 1.6fr 1fr; 
+            gap: 12px; 
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .box-panel {
+            background: #1e1e22;
+            border: 1px solid #33333a;
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            padding-bottom: 4px;
+        }
+
+        .photo-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 5px; 
+            background: #121214;
+            padding: 5px;
+            border: 1px solid #2a2a2e;
+            border-radius: 4px;
+        }
+        .photo-card { 
+            background: #1a1a1e; 
+            border: 1px solid #333; 
+            padding: 2px; 
+            position: relative; 
+            text-align: center;
+            height: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            cursor: pointer;
+            user-select: none;
+        }
+        .photo-card img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            border-radius: 2px;
+        }
+        .photo-card .caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.75);
+            color: #fff;
+            font-size: 9px;
+            padding: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .delete-btn { 
+            position: absolute; 
+            top: 2px; 
+            right: 2px; 
+            background: rgba(200, 0, 0, 0.85); 
+            color: white; 
+            border: none; 
+            padding: 1px 4px; 
+            cursor: pointer; 
+            font-size: 9px;
+            border-radius: 2px;
+            z-index: 2;
+        }
+
+        .photo-modal-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        .photo-modal-content {
+            background: #1e1e22;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 10px;
+            width: 220px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0,0,0,0.8);
+        }
+        .photo-modal-content img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+        .photo-modal-caption {
+            font-size: 11px;
+            color: #ddd;
+            margin-top: 6px;
+            word-break: break-all;
+        }
+
+        .music-section { margin-top: 10px; }
+        .lyrics-ticker-box {
+            background: #000000;
+            border: 1px solid #ff8c00;
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin-bottom: 6px;
+            font-size: 10px;
+            color: #ff8c00;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            height: 26px;
+            overflow: hidden;
+        }
+        .ticker-label {
+            background: #ff8c00;
+            color: #000;
+            font-weight: bold;
+            font-size: 8px;
+            padding: 1px 3px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        .ticker-content {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 1;
+        }
+        .manage-list {
+            list-style: none;
+            max-height: 50px;
+            overflow-y: auto;
+            margin-top: 4px;
+            background: #121214;
+            padding: 3px;
+            border: 1px solid #333;
+            border-radius: 3px;
+        }
+        .manage-list li {
+            font-size: 9px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px;
+            border-bottom: 1px solid #222;
+        }
+
+        .player-container {
+            background: #121214;
+            border: 1px solid #2a2a2e;
+            padding: 6px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+        .now-playing-banner {
+            font-size: 10px;
+            color: #ffffff;
+            margin-bottom: 4px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        audio { 
+            width: 100%; 
+            height: 28px; 
+            outline: none;
+            filter: invert(0.88) hue-rotate(180deg);
+        }
+        .player-controls {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 6px;
+        }
+        .control-btn {
+            flex: 1;
+            background: #222226;
+            color: #aaa;
+            border: 1px solid #333;
+            padding: 3px 0;
+            font-size: 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .control-btn.active {
+            background: #3a3a42;
+            color: #ff8c00;
+            border-color: #ff8c00;
+            font-weight: bold;
+        }
+
+        .playlist { 
+            list-style: none; 
+            max-height: 80px; 
+            overflow-y: auto; 
+            background: #121214;
+            border: 1px solid #2a2a2e;
+            padding: 3px;
+            border-radius: 4px;
+        }
+        .playlist li { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 4px 6px; 
+            border-bottom: 1px solid #222; 
+            font-size: 10px;
+        }
+        .playlist li:last-child { border-bottom: none; }
+        .song-title { cursor: pointer; color: #ddd; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .song-title:hover { color: #ffffff; text-decoration: underline; }
+
+        /* 캐릭터 & 말풍선 */
+        .minimi-box {
+            background: #121214;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .speech-bubble {
+            position: relative;
+            background: #25252b;
+            border: 1px solid #ff8c00;
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 10px;
+            color: #fff;
+            margin-bottom: 8px;
+            cursor: pointer;
+            text-align: center;
+            max-width: 100%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            user-select: none;
+            transition: transform 0.1s ease;
+        }
+        .speech-bubble:active {
+            transform: scale(0.96);
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px 5px 0;
+            border-style: solid;
+            border-color: #ff8c00 transparent;
+            display: block;
+            width: 0;
+        }
+
+        .profile-img-wrap { 
+            width: 100%; 
+            height: 120px; 
+            background: #121214; 
+            border: 1px solid #333; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            overflow: hidden;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+        .profile-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-placeholder { color: #666; font-size: 10px; }
+
+        textarea.profile-text { 
+            width: 100%; 
+            height: 85px; 
+            background: #121214; 
+            border: 1px solid #333; 
+            color: #ffffff; 
+            padding: 6px; 
+            resize: none; 
+            font-size: 10px;
+            line-height: 1.4;
+            border-radius: 4px;
+        }
+
+        .admin-only { display: none; background: #25252b; border: 1px solid #555; padding: 6px; margin-bottom: 6px; border-radius: 4px; }
+        .is-admin .admin-only { display: block !important; }
+
+        .guestbook-section { border-top: 1px solid #333; padding-top: 10px; }
+        .guestbook-form { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+        .guestbook-inputs { display: flex; gap: 5px; }
+        .guestbook-inputs input, input[type="text"], input[type="password"] { 
+            background: #121214; 
+            border: 1px solid #333; 
+            color: #ffffff; 
+            padding: 5px; 
+            font-size: 10px;
+            border-radius: 3px;
+        }
+        .guestbook-form textarea { 
+            background: #121214; 
+            border: 1px solid #333; 
+            color: #ffffff; 
+            padding: 5px; 
+            height: 45px; 
+            resize: none; 
+            font-size: 10px;
+            border-radius: 3px;
+        }
+        
+        button.action-btn { 
+            background: #2a2a30; 
+            color: #ffffff; 
+            border: 1px solid #555; 
+            padding: 5px 10px; 
+            cursor: pointer; 
+            font-size: 10px;
+            border-radius: 3px;
+        }
+        button.action-btn:hover { background: #444; }
+
+        .guestbook-list { display: flex; flex-direction: column; gap: 6px; }
+        .guestbook-item { 
+            background: #161619; 
+            border: 1px solid #333; 
+            padding: 6px; 
+            border-radius: 4px; 
+            font-size: 10px;
+        }
+        .guestbook-header { display: flex; justify-content: space-between; color: #aaa; margin-bottom: 3px; }
+        .guestbook-header .author { color: #ffffff; font-weight: bold; }
+        .guestbook-content { color: #eee; line-height: 1.3; white-space: pre-wrap; }
+        .guestbook-actions { display: flex; gap: 4px; margin-top: 4px; }
+        .mini-btn { background: #2b2b32; color: #ccc; border: 1px solid #444; padding: 2px 4px; font-size: 9px; cursor: pointer; border-radius: 2px; }
+        .mini-btn:hover { background: #444; color: #fff; }
+
+        input:focus, textarea:focus { outline: none; border-color: #777 !important; }
+    </style>
+</head>
+<body>
+
+<div class="hompy-frame" id="hompyApp">
+    <div id="photoModal" class="photo-modal-overlay" onclick="closePhotoModal()">
+        <div class="photo-modal-content" onclick="event.stopPropagation()">
+            <img id="modalImg" src="" />
+            <div id="modalCaption" class="photo-modal-caption"></div>
+        </div>
+    </div>
+
+    <div class="header">
+        <input type="text" id="hompyTitle" class="main-title-input" value="내 미니홈피 공간에 오신 것을 환영합니다" onchange="saveHompyTitle()" readonly />
+        
+        <div class="visitor-count">
+            TODAY <span id="todayCount">1</span> | TOTAL <span id="totalCount" class="total-num">1</span>
+        </div>
+
+        <button id="adminToggleBtn" class="admin-btn" onclick="toggleAdmin()">👑 주인 인증</button>
+    </div>
+
+    <div class="main-layout">
+        <div>
+            <div class="box-panel">
+                <div class="section-title">
+                    <span>📷 PHOTO GALLERY</span>
+                    <span style="font-size:9px; color:#777; font-weight:normal;">*더블클릭 시 크게보기</span>
+                </div>
+
+                <div class="admin-only">
+                    <p style="color:#fff; font-size:10px; margin-bottom:4px;">[주인] 새 사진 올리기</p>
+                    <input type="text" id="photoCaption" placeholder="사진 제목/설명" style="width:100%; margin-bottom:4px;" />
+                    <input type="file" id="photoFile" accept="image/*" onchange="uploadPhoto(event)" style="font-size:10px;" />
+                </div>
+
+                <div class="photo-grid" id="photoGrid"></div>
+            </div>
+
+            <div class="box-panel music-section">
+                <div class="section-title">
+                    <span>🎧 BGM PLAYLIST</span>
+                </div>
+
+                <div class="lyrics-ticker-box">
+                    <span class="ticker-label">LYRICS</span>
+                    <span id="lyricsTicker" class="ticker-content">♬ 가사를 추가해보세요...</span>
+                </div>
+
+                <div class="admin-only">
+                    <p style="color:#fff; font-size:10px; margin-bottom:4px;">[주인] 가사 구절 추가</p>
+                    <div style="display:flex; gap:4px; margin-bottom:4px;">
+                        <input type="text" id="lyricsInput" placeholder="감성 가사 한 줄 추가" style="flex:1;" />
+                        <button class="action-btn" onclick="addLyricLine()">등록</button>
+                    </div>
+                    <ul class="manage-list" id="lyricsManageUl"></ul>
+
+                    <p style="color:#fff; font-size:10px; margin:8px 0 4px 0;">[주인] MP3/음악 파일 업로드</p>
+                    <input type="text" id="songTitle" placeholder="곡 제목 (비워두면 파일명)" style="width:100%; margin-bottom:4px;" />
+                    <input type="file" id="songFile" accept="audio/*" onchange="uploadSong(event)" style="font-size:10px;" />
+                </div>
+
+                <div class="player-container">
+                    <div class="now-playing-banner">
+                        <span>▶</span> <span id="nowPlayingTitle">선택된 곡이 없습니다</span>
+                    </div>
+                    <audio id="audioPlayer" controls onended="handleSongEnded()"></audio>
+                </div>
+
+                <div class="player-controls">
+                    <button id="btnAutoNext" class="control-btn active" onclick="toggleAutoNext()">연속재생 ON</button>
+                    <button id="btnLoopOne" class="control-btn" onclick="toggleLoopOne()">한곡반복 OFF</button>
+                </div>
+
+                <ul class="playlist" id="playlistUl">
+                    <li style="color:#666; text-align:center; display:block;">등록된 음원이 없습니다.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="box-panel">
+            <div class="section-title">
+                <span>👤 PROFILE</span>
+            </div>
+
+            <!-- 디테일해진 고해상도 픽셀 캐릭터 영역 -->
+            <div class="minimi-box">
+                <div class="speech-bubble" id="speechBubble" onclick="changeSpeech()">
+                    "오늘도 놀러와줘서 고마워!" 💖 (클릭해보세요!)
+                </div>
+                
+                <!-- 50x60 고디테일 픽셀 아바타 -->
+                <svg width="75" height="90" viewBox="0 0 50 60" shape-rendering="crispEdges">
+                    <!-- 헤드폰 밴드 -->
+                    <rect x="15" y="3" width="20" height="3" fill="#ff7700"/>
+                    <rect x="13" y="6" width="3" height="10" fill="#ff7700"/>
+                    <rect x="34" y="6" width="3" height="10" fill="#ff7700"/>
+                    <rect x="11" y="10" width="3" height="8" fill="#33333d"/>
+                    <rect x="36" y="10" width="3" height="8" fill="#33333d"/>
+
+                    <!-- 머리 (보브 단발 레이어) -->
+                    <rect x="17" y="6" width="16" height="6" fill="#181820"/>
+                    <rect x="14" y="12" width="22" height="6" fill="#181820"/>
+                    <rect x="11" y="18" width="6" height="16" fill="#181820"/>
+                    <rect x="33" y="18" width="6" height="16" fill="#181820"/>
+                    <!-- 머릿결 하이라이트 -->
+                    <rect x="18" y="7" width="4" height="2" fill="#313140"/>
+                    <rect x="28" y="7" width="3" height="2" fill="#313140"/>
+
+                    <!-- 얼굴 피부 base -->
+                    <rect x="17" y="16" width="16" height="15" fill="#ffe0c2"/>
+                    <rect x="19" y="31" width="12" height="3" fill="#ffe0c2"/>
+
+                    <!-- 눈썹 -->
+                    <rect x="18" y="18" width="4" height="1" fill="#443a32"/>
+                    <rect x="28" y="18" width="4" height="1" fill="#443a32"/>
+
+                    <!-- 디테일 픽셀 눈 -->
+                    <rect x="18" y="21" width="4" height="5" fill="#201815"/>
+                    <rect x="28" y="21" width="4" height="5" fill="#201815"/>
+                    <rect x="18" y="21" width="2" height="2" fill="#ffffff"/> <!-- 반사광 -->
+                    <rect x="28" y="21" width="2" height="2" fill="#ffffff"/>
+
+                    <!-- 볼터치 & 입 -->
+                    <rect x="16" y="26" width="4" height="2" fill="#ff99ab"/>
+                    <rect x="30" y="26" width="4" height="2" fill="#ff99ab"/>
+                    <rect x="23" y="27" width="4" height="2" fill="#e86b7b"/>
+
+                    <!-- 목 -->
+                    <rect x="22" y="33" width="6" height="3" fill="#f2ccaa"/>
+                    <!-- 초커 목걸이 -->
+                    <rect x="21" y="35" width="8" height="1" fill="#111116"/>
+
+                    <!-- Y2K 홀터넥/크롭 상의 -->
+                    <rect x="18" y="36" width="14" height="8" fill="#5eead4"/>
+                    <rect x="21" y="38" width="8" height="4" fill="#a5f3fc"/>
+                    <!-- 팔 & 손 -->
+                    <rect x="14" y="36" width="4" height="10" fill="#ffe0c2"/>
+                    <rect x="32" y="36" width="4" height="10" fill="#ffe0c2"/>
+
+                    <!-- Y2K 허리 체인/벨트 -->
+                    <rect x="17" y="44" width="16" height="2" fill="#1e293b"/>
+                    <rect x="28" y="44" width="3" height="3" fill="#f59e0b"/> <!-- 체인 포인트 -->
+
+                    <!-- Y2K 카고 바지 (통넓은 파스텔 실버/블루) -->
+                    <rect x="15" y="46" width="20" height="11" fill="#64748b"/>
+                    <rect x="24" y="48" width="2" height="9" fill="#1e293b"/> <!-- 중앙 재봉선 -->
+                    <!-- 주머니 포켓 디테일 -->
+                    <rect x="13" y="49" width="3" height="5" fill="#475569"/>
+                    <rect x="34" y="49" width="3" height="5" fill="#475569"/>
+
+                    <!-- 통굽 운동화 -->
+                    <rect x="13" y="57" width="9" height="3" fill="#ffffff"/>
+                    <rect x="28" y="57" width="9" height="3" fill="#ffffff"/>
+                    <rect x="13" y="59" width="9" height="1" fill="#0f172a"/>
+                    <rect x="28" y="59" width="9" height="1" fill="#0f172a"/>
+                </svg>
+            </div>
+
+            <div class="admin-only">
+                <p style="color:#fff; font-size:10px; margin-bottom:4px;">[주인] 캐릭터 말풍선 대사 추가</p>
+                <div style="display:flex; gap:4px; margin-bottom:4px;">
+                    <input type="text" id="speechInput" placeholder="말풍선 대사 입력" style="flex:1;" />
+                    <button class="action-btn" onclick="addSpeechLine()">등록</button>
+                </div>
+                <ul class="manage-list" id="speechManageUl"></ul>
+
+                <p style="color:#fff; font-size:10px; margin:8px 0 4px 0;">[주인] 프로필 이미지 변경</p>
+                <input type="file" accept="image/*" onchange="uploadProfileImg(event)" style="font-size:10px;" />
+            </div>
+
+            <div class="profile-img-wrap">
+                <img id="profileImg" src="" style="display:none;" />
+                <span id="profilePlaceholder" class="profile-placeholder">NO IMAGE</span>
+            </div>
+
+            <textarea id="profileText" class="profile-text" placeholder="소개글을 입력하세요." onchange="saveProfileText()" readonly></textarea>
+        </div>
+    </div>
+
+    <div class="box-panel guestbook-section">
+        <div class="section-title">📖 GUESTBOOK</div>
+
+        <div class="guestbook-form">
+            <div class="guestbook-inputs">
+                <input type="text" id="guestName" placeholder="닉네임" style="width: 50%;" />
+                <input type="password" id="guestPw" placeholder="비밀번호 (삭제용)" style="width: 50%;" />
+            </div>
+            <textarea id="guestContent" placeholder="방명록을 남겨주세요..."></textarea>
+            <button class="action-btn" onclick="addGuestbook()">방명록 남기기</button>
+        </div>
+
+        <div class="guestbook-list" id="guestbookList"></div>
+    </div>
+</div>
+
+<script>
+    const ADMIN_PASS = "070604";
+    let isAdmin = false;
+
+    let db;
+    let photos = [];
+    let songs = [];
+    let lyricsLines = [];
+    let speechLines = [];
+    
+    let lyricIndex = 0;
+    let speechIdx = 0;
+    let lyricInterval = null;
+
+    let guestbook = JSON.parse(localStorage.getItem('hp_guestbook') || '[]');
+    let profileData = JSON.parse(localStorage.getItem('hp_profile') || '{"img":"","text":"나만의 소중한 공간입니다."}');
+    let hompyTitle = localStorage.getItem('hp_title') || '내 미니홈피 공간에 오신 것을 환영합니다';
+
+    let currentSongIndex = 0;
+    let isAutoNext = true;
+    let isLoopOne = false;
+
+    function initDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open("HompyDB", 3);
+            request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains("photos")) db.createObjectStore("photos", { keyPath: "id" });
+                if (!db.objectStoreNames.contains("songs")) db.createObjectStore("songs", { keyPath: "id" });
+                if (!db.objectStoreNames.contains("lyrics")) db.createObjectStore("lyrics", { keyPath: "id" });
+                if (!db.objectStoreNames.contains("speeches")) db.createObjectStore("speeches", { keyPath: "id" });
+            };
+            request.onsuccess = (e) => {
+                db = e.target.result;
+                resolve();
+            };
+            request.onerror = (e) => reject(e);
+        });
+    }
+
+    function getAllFromStore(storeName) {
+        return new Promise((resolve) => {
+            const tx = db.transaction(storeName, "readonly");
+            const store = tx.objectStore(storeName);
+            const req = store.getAll();
+            req.onsuccess = () => resolve(req.result || []);
+        });
+    }
+
+    function saveToStore(storeName, item) {
+        return new Promise((resolve) => {
+            const tx = db.transaction(storeName, "readwrite");
+            const store = tx.objectStore(storeName);
+            store.put(item);
+            tx.oncomplete = () => resolve();
+        });
+    }
+
+    function deleteFromStore(storeName, id) {
+        return new Promise((resolve) => {
+            const tx = db.transaction(storeName, "readwrite");
+            const store = tx.objectStore(storeName);
+            store.delete(id);
+            tx.oncomplete = () => resolve();
+        });
+    }
+
+    window.onload = async function() {
+        await initDB();
+        photos = await getAllFromStore("photos");
+        songs = await getAllFromStore("songs");
+        lyricsLines = await getAllFromStore("lyrics");
+        speechLines = await getAllFromStore("speeches");
+
+        if (lyricsLines.length === 0) {
+            const initialLyrics = [
+                "♬ 난... 가끔 눈물을 흘린다...",
+                "♬ 내 삶의 BGM은 내가 정해",
+                "♬ 미니홈피 방문을 환영합니다★"
+            ];
+            for (let text of initialLyrics) {
+                const item = { id: Date.now() + Math.random(), text: text };
+                await saveToStore("lyrics", item);
+                lyricsLines.push(item);
+            }
+        }
+
+        if (speechLines.length === 0) {
+            const initialSpeeches = [
+                '"오늘도 놀러와줘서 고마워!" 💖',
+                '"오늘 Y2K 감성 어때?" 🎧',
+                '"BGM 들으면서 쉬다 가~ 🎶"',
+                '"방명록에 한줄 남겨줄래? 📝"',
+                '"난... 가끔 눈물을 흘린다... 💧"'
+            ];
+            for (let text of initialSpeeches) {
+                const item = { id: Date.now() + Math.random(), text: text };
+                await saveToStore("speeches", item);
+                speechLines.push(item);
+            }
+        }
+
+        renderPhotos();
+        renderSongs();
+        renderLyricsManager();
+        renderSpeechManager();
+        startLyricsTicker();
+        renderGuestbook();
+        renderProfile();
+        updateVisitorCounter();
+        
+        if (speechLines.length > 0) {
+            document.getElementById('speechBubble').innerText = speechLines[0].text;
+        }
+
+        document.getElementById('hompyTitle').value = hompyTitle;
+    };
+
+    function changeSpeech() {
+        if (speechLines.length === 0) return;
+        speechIdx = (speechIdx + 1) % speechLines.length;
+        document.getElementById('speechBubble').innerText = speechLines[speechIdx].text;
+    }
+
+    async function addSpeechLine() {
+        const input = document.getElementById('speechInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const newItem = { id: Date.now(), text: `"${text}"` };
+        speechLines.push(newItem);
+        await saveToStore("speeches", newItem);
+        input.value = '';
+
+        renderSpeechManager();
+        changeSpeech();
+    }
+
+    async function deleteSpeechLine(id) {
+        speechLines = speechLines.filter(s => s.id !== id);
+        await deleteFromStore("speeches", id);
+        renderSpeechManager();
+        if (speechLines.length > 0) {
+            changeSpeech();
+        } else {
+            document.getElementById('speechBubble').innerText = "대사를 추가해보세요!";
+        }
+    }
+
+    function renderSpeechManager() {
+        const ul = document.getElementById('speechManageUl');
+        ul.innerHTML = '';
+        speechLines.forEach(s => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>${s.text}</span>
+                <button class="mini-btn" onclick="deleteSpeechLine(${s.id})">삭제</button>
+            `;
+            ul.appendChild(li);
+        });
+    }
+
+    function startLyricsTicker() {
+        if (lyricInterval) clearInterval(lyricInterval);
+        const tickerEl = document.getElementById('lyricsTicker');
+
+        if (lyricsLines.length === 0) {
+            tickerEl.innerText = "등록된 가사가 없습니다.";
+            return;
+        }
+
+        const updateTicker = () => {
+            tickerEl.style.opacity = 0;
+            setTimeout(() => {
+                lyricIndex = (lyricIndex + 1) % lyricsLines.length;
+                tickerEl.innerText = lyricsLines[lyricIndex].text;
+                tickerEl.style.opacity = 1;
+            }, 500);
+        };
+
+        tickerEl.innerText = lyricsLines[0].text;
+        lyricInterval = setInterval(updateTicker, 3500);
+    }
+
+    async function addLyricLine() {
+        const input = document.getElementById('lyricsInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const newItem = { id: Date.now(), text: "♬ " + text };
+        lyricsLines.push(newItem);
+        await saveToStore("lyrics", newItem);
+        input.value = '';
+
+        renderLyricsManager();
+        startLyricsTicker();
+    }
+
+    async function deleteLyricLine(id) {
+        lyricsLines = lyricsLines.filter(l => l.id !== id);
+        await deleteFromStore("lyrics", id);
+        renderLyricsManager();
+        startLyricsTicker();
+    }
+
+    function renderLyricsManager() {
+        const ul = document.getElementById('lyricsManageUl');
+        ul.innerHTML = '';
+        lyricsLines.forEach(l => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>${l.text}</span>
+                <button class="mini-btn" onclick="deleteLyricLine(${l.id})">삭제</button>
+            `;
+            ul.appendChild(li);
+        });
+    }
+
+    function updateVisitorCounter() {
+        const todayStr = new Date().toDateString();
+        let lastDate = localStorage.getItem('hp_last_date');
+        let todayCount = parseInt(localStorage.getItem('hp_today') || '0', 10);
+        let totalCount = parseInt(localStorage.getItem('hp_total') || '0', 10);
+
+        if (lastDate !== todayStr) {
+            todayCount = 0;
+            localStorage.setItem('hp_last_date', todayStr);
+        }
+
+        if (!sessionStorage.getItem('hp_visited')) {
+            todayCount += 1;
+            totalCount += 1;
+            sessionStorage.setItem('hp_visited', 'true');
+            localStorage.setItem('hp_today', todayCount);
+            localStorage.setItem('hp_total', totalCount);
+        }
+
+        document.getElementById('todayCount').innerText = todayCount.toLocaleString();
+        document.getElementById('totalCount').innerText = totalCount.toLocaleString();
+    }
+
+    function toggleAdmin() {
+        if (isAdmin) {
+            isAdmin = false;
+            document.getElementById('hompyApp').classList.remove('is-admin');
+            document.getElementById('adminToggleBtn').innerText = "👑 주인 인증";
+            document.getElementById('profileText').readOnly = true;
+            document.getElementById('hompyTitle').readOnly = true;
+            alert("관리자 모드가 해제되었습니다.");
+        } else {
+            const inputPw = prompt("관리자 비밀번호를 입력하세요:");
+            if (inputPw === ADMIN_PASS) {
+                isAdmin = true;
+                document.getElementById('hompyApp').classList.add('is-admin');
+                document.getElementById('adminToggleBtn').innerText = "🔓 주인 인증 완료";
+                document.getElementById('profileText').readOnly = false;
+                document.getElementById('hompyTitle').readOnly = false;
+                alert("주인 인증 성공!");
+                renderPhotos(); 
+                renderGuestbook();
+                renderSongs();
+            } else if (inputPw !== null) {
+                alert("비밀번호가 올바르지 않습니다.");
+            }
+        }
+    }
+
+    function saveHompyTitle() {
+        if (!isAdmin) return;
+        localStorage.setItem('hp_title', document.getElementById('hompyTitle').value);
+    }
+
+    function renderProfile() {
+        const imgEl = document.getElementById('profileImg');
+        const placeholder = document.getElementById('profilePlaceholder');
+        const textEl = document.getElementById('profileText');
+
+        if (profileData.img) {
+            imgEl.src = profileData.img;
+            imgEl.style.display = 'block';
+            placeholder.style.display = 'none';
+        } else {
+            imgEl.style.display = 'none';
+            placeholder.style.display = 'block';
+        }
+        textEl.value = profileData.text || '';
+    }
+
+    function uploadProfileImg(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            profileData.img = event.target.result;
+            localStorage.setItem('hp_profile', JSON.stringify(profileData));
+            renderProfile();
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function saveProfileText() {
+        if (!isAdmin) return;
+        profileData.text = document.getElementById('profileText').value;
+        localStorage.setItem('hp_profile', JSON.stringify(profileData));
+    }
+
+    async function uploadPhoto(e) {
+        if (photos.length >= 9) {
+            alert("3x3 격자가 가득 찼습니다. 기존 사진 삭제 후 올려주세요.");
+            return;
+        }
+        const file = e.target.files[0];
+        const caption = document.getElementById('photoCaption').value || "무제";
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+            const newPhoto = { id: Date.now(), src: event.target.result, caption: caption };
+            photos.push(newPhoto);
+            await saveToStore("photos", newPhoto);
+            document.getElementById('photoCaption').value = '';
+            e.target.value = '';
+            renderPhotos();
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function deletePhoto(id, event) {
+        if (event) event.stopPropagation();
+        if (!isAdmin) return;
+        if (confirm("삭제하시겠습니까?")) {
+            photos = photos.filter(p => p.id !== id);
+            await deleteFromStore("photos", id);
+            renderPhotos();
+        }
+    }
+
+    function openPhotoModal(src, caption) {
+        document.getElementById('modalImg').src = src;
+        document.getElementById('modalCaption').innerText = caption;
+        document.getElementById('photoModal').style.display = 'flex';
+    }
+
+    function closePhotoModal() {
+        document.getElementById('photoModal').style.display = 'none';
+    }
+
+    function renderPhotos() {
+        const grid = document.getElementById('photoGrid');
+        grid.innerHTML = '';
+        for (let i = 0; i < 9; i++) {
+            const card = document.createElement('div');
+            card.className = 'photo-card';
+            if (photos[i]) {
+                card.ondblclick = () => openPhotoModal(photos[i].src, photos[i].caption);
+                card.innerHTML = `
+                    <img src="${photos[i].src}" />
+                    <div class="caption">${photos[i].caption}</div>
+                    ${isAdmin ? `<button class="delete-btn" onclick="deletePhoto(${photos[i].id}, event)">X</button>` : ''}
+                `;
+            } else {
+                card.innerHTML = `<span style="color:#444; font-size:10px;">EMPTY</span>`;
+            }
+            grid.appendChild(card);
+        }
+    }
+
+    function toggleAutoNext() {
+        isAutoNext = !isAutoNext;
+        const btn = document.getElementById('btnAutoNext');
+        if (isAutoNext) {
+            btn.classList.add('active');
+            btn.innerText = "연속재생 ON";
+        } else {
+            btn.classList.remove('active');
+            btn.innerText = "연속재생 OFF";
+        }
+    }
+
+    function toggleLoopOne() {
+        isLoopOne = !isLoopOne;
+        const btn = document.getElementById('btnLoopOne');
+        const player = document.getElementById('audioPlayer');
+
+        if (isLoopOne) {
+            btn.classList.add('active');
+            btn.innerText = "한곡반복 ON";
+            player.loop = true;
+        } else {
+            btn.classList.remove('active');
+            btn.innerText = "한곡반복 OFF";
+            player.loop = false;
+        }
+    }
+
+    function handleSongEnded() {
+        if (isLoopOne) return;
+
+        if (isAutoNext && songs.length > 0) {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            playSongByIndex(currentSongIndex);
+        }
+    }
+
+    async function uploadSong(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const titleInput = document.getElementById('songTitle').value.trim();
+        const title = titleInput !== "" ? titleInput : file.name;
+
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+            const newSong = { id: Date.now(), title: title, src: event.target.result };
+            songs.push(newSong);
+            await saveToStore("songs", newSong);
+
+            document.getElementById('songTitle').value = '';
+            e.target.value = '';
+            
+            renderSongs();
+            playSongByIndex(songs.length - 1);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function playSongByIndex(index) {
+        if (index < 0 || index >= songs.length) return;
+        currentSongIndex = index;
+        const song = songs[index];
+
+        const player = document.getElementById('audioPlayer');
+        const titleBanner = document.getElementById('nowPlayingTitle');
+
+        player.src = song.src;
+        titleBanner.innerText = song.title;
+        player.play();
+    }
+
+    async function deleteSong(id, event) {
+        if (event) event.stopPropagation();
+        if (!isAdmin) return;
+        if (confirm("이 음악을 삭제하시겠습니까?")) {
+            songs = songs.filter(s => s.id !== id);
+            await deleteFromStore("songs", id);
+            renderSongs();
+        }
+    }
+
+    function renderSongs() {
+        const ul = document.getElementById('playlistUl');
+        ul.innerHTML = '';
+
+        if (songs.length === 0) {
+            ul.innerHTML = `<li style="color:#555; text-align:center; display:block;">등록된 음원이 없습니다.</li>`;
+            document.getElementById('nowPlayingTitle').innerText = "선택된 곡이 없습니다";
+            document.getElementById('audioPlayer').src = "";
+            return;
+        }
+
+        songs.forEach((song, idx) => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span class="song-title" onclick="playSongByIndex(${idx})">♬ ${song.title}</span>
+                ${isAdmin ? `<button class="mini-btn" onclick="deleteSong(${song.id}, event)">삭제</button>` : ''}
+            `;
+            ul.appendChild(li);
+        });
+
+        if (!document.getElementById('audioPlayer').src && songs.length > 0) {
+            document.getElementById('audioPlayer').src = songs[0].src;
+            document.getElementById('nowPlayingTitle').innerText = songs[0].title;
+        }
+    }
+
+    function addGuestbook() {
+        const name = document.getElementById('guestName').value.trim();
+        const pw = document.getElementById('guestPw').value.trim();
+        const content = document.getElementById('guestContent').value.trim();
+
+        if (!name || !pw || !content) {
+            alert("닉네임, 비밀번호, 내용을 입력하세요.");
+            return;
+        }
+
+        const newEntry = {
+            id: Date.now(),
+            name: name,
+            pw: pw,
+            content: content,
+            date: new Date().toLocaleDateString()
+        };
+
+        guestbook.unshift(newEntry);
+        localStorage.setItem('hp_guestbook', JSON.stringify(guestbook));
+
+        document.getElementById('guestName').value = '';
+        document.getElementById('guestPw').value = '';
+        document.getElementById('guestContent').value = '';
+
+        renderGuestbook();
+    }
+
+    function deleteGuestbook(id) {
+        const target = guestbook.find(g => g.id === id);
+        if (!target) return;
+
+        if (isAdmin) {
+            if (confirm("[관리자] 삭제할까요?")) {
+                guestbook = guestbook.filter(g => g.id !== id);
+                localStorage.setItem('hp_guestbook', JSON.stringify(guestbook));
+                renderGuestbook();
+            }
+            return;
+        }
+
+        const inputPw = prompt("비밀번호 입력:");
+        if (inputPw === target.pw) {
+            guestbook = guestbook.filter(g => g.id !== id);
+            localStorage.setItem('hp_guestbook', JSON.stringify(guestbook));
+            renderGuestbook();
+        } else if (inputPw !== null) {
+            alert("비밀번호 불일치!");
+        }
+    }
+
+    function editGuestbook(id) {
+        const target = guestbook.find(g => g.id === id);
+        if (!target) return;
+
+        const inputPw = prompt("비밀번호 입력:");
+        if (inputPw === target.pw) {
+            const newContent = prompt("수정 내용:", target.content);
+            if (newContent !== null && newContent.trim() !== "") {
+                target.content = newContent.trim();
+                localStorage.setItem('hp_guestbook', JSON.stringify(guestbook));
+                renderGuestbook();
+            }
+        } else if (inputPw !== null) {
+            alert("비밀번호 불일치!");
+        }
+    }
+
+    function renderGuestbook() {
+        const list = document.getElementById('guestbookList');
+        list.innerHTML = '';
+
+        if (guestbook.length === 0) {
+            list.innerHTML = `<div style="color:#666; font-size:10px; text-align:center; padding:6px;">첫 방명록을 남겨보세요!</div>`;
+            return;
+        }
+
+        guestbook.forEach(g => {
+            const item = document.createElement('div');
+            item.className = 'guestbook-item';
+            item.innerHTML = `
+                <div class="guestbook-header">
+                    <span class="author">${g.name}</span>
+                    <span>${g.date}</span>
+                </div>
+                <div class="guestbook-content">${g.content}</div>
+                <div class="guestbook-actions">
+                    <button class="mini-btn" onclick="editGuestbook(${g.id})">수정</button>
+                    <button class="mini-btn" onclick="deleteGuestbook(${g.id})">삭제 ${isAdmin ? '(관리자)' : ''}</button>
+                </div>
+            `;
+            list.appendChild(item);
+        });
+    }
+</script>
+</body>
+</html>
